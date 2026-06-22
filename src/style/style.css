@@ -1,0 +1,69 @@
+.border{
+    border: 2px solid #d7e0ca; /* Dein gewünschter abgerundeter Rahmen */
+    border-radius: 12px;
+}
+.tornado-card {
+    display: flex;
+    flex-direction: column; /* Stapelt die Reihen untereinander */
+    gap: 16px;              /* Erzeugt den Abstand zwischen Reihe 1 und Reihe 2 */
+    border-radius: 12px;
+    padding: 16px 18px;     /* Etwas mehr Padding nach oben/unten tut dem Stapel gut */
+    font-family: sans-serif;
+}
+.icon {
+    color: rgb(77, 77, 77);
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-right: 12px;
+}
+.info-box-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;                 /* Abstand zwischen Reihe 1 und Reihe 2 */
+    
+    padding: 16px;             /* Innenabstand, damit die Reihen nicht am Rand kleben */
+    box-sizing: border-box;
+}
+
+/* Die Zeilen selbst bleiben schlicht und reihen sich brav ein */
+.card-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+.divider {
+    width: 2px;
+    height: 40px;
+    background-color: #ccc;
+    margin-right: 16px;
+}
+
+.data-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.big-number {
+    font-size: 20px;
+    font-weight: 550;
+    color: #991b1b; /* Das gleiche Grün für die Zahl */
+    line-height: 1.1;
+}
+
+.label {
+    font-size: 13px;
+    color: #4a4a4a; /* Dunkelgrau für die Beschriftung */
+    margin-top: 2px;
+}
+.tornado-card-h1{
+    font-size: 25px;
+    color: #5c723c;
+}
+h1{
+    font-family: sans-serif;
+    font-size: 30px;
+    color: #5c723c; 
+}
+
