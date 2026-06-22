@@ -1,13 +1,13 @@
 .border{
-    border: 2px solid #d7e0ca; /* Dein gewünschter abgerundeter Rahmen */
+    border: 2px solid #d7e0ca;
     border-radius: 12px;
 }
 .tornado-card {
     display: flex;
-    flex-direction: column; /* Stapelt die Reihen untereinander */
-    gap: 16px;              /* Erzeugt den Abstand zwischen Reihe 1 und Reihe 2 */
+    flex-direction: column;
+    gap: 16px;
     border-radius: 12px;
-    padding: 16px 18px;     /* Etwas mehr Padding nach oben/unten tut dem Stapel gut */
+    padding: 16px 18px;
     font-family: sans-serif;
 }
 .icon {
@@ -21,13 +21,12 @@
 .info-box-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 16px;                 /* Abstand zwischen Reihe 1 und Reihe 2 */
+    gap: 16px;
     
-    padding: 16px;             /* Innenabstand, damit die Reihen nicht am Rand kleben */
+    padding: 16px;
     box-sizing: border-box;
 }
 
-/* Die Zeilen selbst bleiben schlicht und reihen sich brav ein */
 .card-row {
     display: flex;
     align-items: center;
@@ -48,13 +47,13 @@
 .big-number {
     font-size: 20px;
     font-weight: 550;
-    color: #991b1b; /* Das gleiche Grün für die Zahl */
+    color: #991b1b;
     line-height: 1.1;
 }
 
 .label {
     font-size: 13px;
-    color: #4a4a4a; /* Dunkelgrau für die Beschriftung */
+    color: #4a4a4a;
     margin-top: 2px;
 }
 .tornado-card-h1{

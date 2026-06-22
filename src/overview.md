@@ -2,161 +2,264 @@
 theme: dashboard
 toc: false
 ---
-```js
-import * as d3 from "npm:d3";
-import * as Plot from "npm:@observablehq/plot";
-import * as topojson from "npm:topojson-client";
 
-```
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="./style/style.css">
 
+```js
+const data = await FileAttachment("./data/tornados.json").json()
+const us = await FileAttachment("./map/counties-albers-10m.json").json();
+```
 
 ```js
-//const data = await FileAttachment("./data/US_Tornado_dataset_2009-2021.csv").csv()
-const data = await FileAttachment("./data/tornados.geojson").json()
-const us = await FileAttachment("./map/counties-10m.json").json();
-import { createFilterBox, createButton } from "./style/layout.js";
+const filteredData = d3.filter(data, d => {
+  return (select === "All months" || d.Month === +select) && 
+         (yearSlider === 2008 || d.Year === yearSlider);
+});
 ```
 
 <h1>Tornado Activity in the United States</h1>
 
 
-<div class="card">
-<span class="tornado-card-h1">Tornado Track Analysis</span>
 
-  ```js
-// 1. Inputs erstellen (angepasst an die GeoJSON-Struktur von data.features)
-const select = Inputs.select([
-  "All months", 
-  ...Array.from(d3.group(data.features, d => d.properties.Month).keys()).sort((a, b) => a - b)
-], { label: "Months:", value: "All months" });
-
-const yearSlider = Inputs.range([2008, 2021], { label: "Year:", value: 2008, step: 1 });
-d3.select(yearSlider)
-  .style("display", "flex")
-  .style("flex-direction", "column")
-  .style("align-items", "flex-start")
-  .style("margin-bottom", "50px")
-  .style("gap", "4px");
-
-const magnitudeInput = Inputs.checkbox([-9, 0, 1, 2, 3, 4, 5], {
-  label: "Magnitudes:",
-  value: [-9, 0, 1, 2, 3, 4, 5],
-  format: d => d === -9 ? "EFU" : `EF${d}` 
-});
-
-
-
-const states = topojson.feature(us, us.objects.states).features;
-const statemesh = topojson.mesh(us, us.objects.states, (a, b) => a !== b);
-
-const renderMap = () =>
-  Plot.plot({
-    className: "tornado-map",
-    width: 1200,
-    height: 860,
-    projection: "albers-usa", 
-    figure: false,
-    color: {
-      type: "ordinal",
-      domain: [-9, 0, 1, 2, 3, 4, 5],
-      range: ["#adadad", "#84e9e2", "#f1e374", "#d39d32", "#e6771d", "#d44a5f", "#8a6fe0"],
-      legend: true,
-      label: "Tornado Magnitude (EF-Scale)"
-    },
-    marks: [
-      Plot.geo(states, { 
-        fill: "#f7faf5bd", 
-        stroke: "#ccc", 
-        strokeWidth: 0.5 
-      }),
-      Plot.geo(statemesh, { 
-        className: "state-borders", 
-        stroke: "#9ca3af", 
-        strokeWidth: 1 
-      }),
-      Plot.geo(data.features, { 
-        className: "tornado-tracks",
-        stroke: d => d.properties.Magnitude,
-        strokeWidth: 1.5,
-        title: d => `Date: ${d.properties.Date}\nMonth: ${d.properties.Month}\nYear: ${d.properties.Year}\nInjuries: ${d.properties.Injuries}\nFatalities: ${d.properties.Fatalities}\nMagnitude: ${d.properties.Magnitude === -9 ? "EFU" : `EF${d.properties.Magnitude}`}`
-      })
-    ]
-  });
-
-const layout = createFilterBox();
-const resetButton = createButton();
-layout.mapContainer.append(() => resetButton.node());
-
-const chart = renderMap();
-layout.mapContainer.append(() => chart);
-
-
-d3.select(chart).style("width", "100%").style("height", "100%").style("display", "block");
-
-//Adding zoom
-const svgContent = d3.select(chart).selectAll("g");
-
-const handleZoom = (e) => {
-  svgContent.attr("transform", e.transform);
-  d3.select(chart).selectAll(".state-borders").style("stroke-width", 1 / e.transform.k);
-  d3.select(chart).selectAll(".tornado-tracks").style("stroke-width", 1.5 / e.transform.k);
-};
-
-const zoom = d3.zoom()
-  .scaleExtent([1, 18])
-  .on("zoom", handleZoom);
-
-layout.mapContainer.call(zoom);
-
-resetButton.on("click", () => {
-  layout.mapContainer.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
-});
-
-
-const updateVisibility = () => {
-  const activeMags = (magnitudeInput.value || []).map(String);
-  const selectedMonth = String(select.value);
-  const selectedYear = String(yearSlider.value);
-
-  d3.select(chart)
-    .selectAll(".tornado-tracks path")
-    .each(function() {
-      const titleText = this.textContent || "";
-      if (!titleText) return;
-
-      //Extract values from text
-      const monthMatch = titleText.match(/Month:\s*(\d+)/);
-      const yearMatch  = titleText.match(/Year:\s*(\d+)/);
-      const magMatch   = titleText.match(/Magnitude:\s*EF(-?\d+|U)/);
-
-      const month = monthMatch[1];
-      const year  = yearMatch[1];
-      //If EFU -> adds -9 again for the filter
-      const mag   = magMatch[1] === "U" ? "-9" : magMatch[1];
-
-      const magMatches   = activeMags.includes(String(mag));
-      const monthMatches = selectedMonth === "All months" || String(month) === selectedMonth;
-      const yearMatches  = yearSlider.value === 2008 || String(year) === selectedYear;
-
-      //Change visibility
-      this.style.display = (magMatches && monthMatches && yearMatches) ? null : "none";
+```js
+    const filteredDataByYear = d3.filter(data, d => {
+      return(yearSlider === 2008 || d.Year === yearSlider);
     });
-};
 
-magnitudeInput.addEventListener("input", updateVisibility);
-select.addEventListener("input", updateVisibility);
-yearSlider.addEventListener("input", updateVisibility);
-
-//Add all filters to the filter box
-layout.filterBox.append(() => select);
-layout.filterBox.append(() => yearSlider);
-layout.filterBox.append(() => magnitudeInput);
-
-display(layout.container);
+    //Sort data by month to properly display the line
+    const monthlyCounts = d3.flatRollup(
+      filteredDataByYear,
+      v => ({
+        Count: v.length,
+        TotalInjuries: d3.sum(v, d => +d.Injuries),
+        TotalFatalities: d3.sum(v, d => +d.Fatalities)
+      }),
+      d => +d.Month 
+    )
+    .map(([Month, stats]) => ({ Month, ...stats }))
+    .sort((a, b) => a.Month - b.Month);
 ```
 
+
+<div class="card grid grid-cols-2" style="grid-auto-rows: auto;">
+  <div class="border card grid-colspan-2">
+  
+  ```js
+  const yearSlider = view(Inputs.range([2008, 2021], {label: "Year:", value: 2008, step: 1}));
+  ```
+
+  </div>
+  <div class="border card">
+  
+  <span class="tornado-card-h1">Tornadoes per Month</span>
+
+```js
+    display(Plot.plot({
+      height: 130,
+      style: {
+        fontSize: "14px",
+        marginBottom: 10,
+        marginTop: 10, 
+      },
+      y: {
+        grid: true,
+        label: "Number of Tornadoes",
+        labelOffset: 40,
+      },
+      x: {
+        labelOffset: 45,
+        domain: d3.range(1, 13), 
+        tickFormat: d => ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"][d - 1]
+      },
+      marks: [
+        Plot.lineY(monthlyCounts, {
+          x: "Month",
+          y: "Count",
+          stroke: "#590301"
+        }),
+        
+        //Dots to make it easier to see
+        Plot.dotY(monthlyCounts, {
+          x: "Month",
+          y: "Count",
+          fill: "#590301",
+          r: 4,
+          tip: true, 
+          title: d => `${d.Count}`,
+        })
+      ]
+    }));
+
+   ```
+  </div>
+  <div class="border card">
+  
+  <span class="tornado-card-h1">Injuries and Fatalities per Month</span>
+
+```js
+    display(Plot.plot({
+      height: 130,
+      style: {
+        fontSize: "14px",
+        marginBottom: 10,
+        marginTop: 10, 
+      },
+      y: {
+        grid: true,
+        label: "Number of Tornadoes",
+        labelOffset: 40,
+      },
+      x: {
+        labelOffset: 45,
+        domain: d3.range(1, 13), 
+        tickFormat: d => ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"][d - 1]
+      },
+      marks: [
+        Plot.lineY(monthlyCounts, {
+          x: "Month",
+          y: "TotalInjuries",
+          stroke: "#c04d0c"
+        }),
+        //Dots to make it easier to see
+        Plot.dotY(monthlyCounts, {
+          x: "Month",
+          y: "TotalInjuries",
+          fill: "#c04d0c",
+          r: 4,
+          tip: true, 
+          title: d => `${d.TotalInjuries}`,
+        }),
+        Plot.text(monthlyCounts, Plot.selectLast({
+          x: "Month",
+          y: "TotalInjuries",
+          text: () => "Injuries",
+          textAnchor: "start", //Ensures that the text starts after the point
+          dx: 8,  //moves text 8px to the right
+          fill: "#c04d0c"
+        })),
+        Plot.lineY(monthlyCounts, {
+          x: "Month",
+          y: "TotalFatalities",
+          stroke: "#590301"
+        }),
+        Plot.dotY(monthlyCounts, {
+          x: "Month",
+          y: "TotalFatalities",
+          fill: "#590301",
+          r: 4,
+          tip: true, 
+          title: d => `${d.TotalFatalities}`,
+        }),
+        Plot.text(monthlyCounts, Plot.selectLast({
+          x: "Month",
+          y: "TotalFatalities",
+          text: () => "Fatalities",
+          textAnchor: "start", //Ensures that the text starts after the point
+          dx: 8,  //moves text 8px to the right
+          fill: "#590301"
+        }))
+      ]
+    }));
+
+   ```
+  
+  </div>
+
+
+
+
+
+  <div class="border card grid-colspan-2">
+    <span class="tornado-card-h1">Injuries per Magnitude</span>
+
+<div style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">
+
+```js  
+  const select = view(Inputs.select(["All months", ...Array.from(d3.group(data, d => d.Month).keys()).sort((a, b) => a - b)], {label: "Months:",value: "All months"}));
+   ```
+
+```js
+
+  const selectedMetrics = view(Inputs.checkbox(["Injuries", "Fatalities"], {
+  value: ["Injuries", "Fatalities"],
+  label: "Display:",
+}));
+  ```
 </div>
 
+  ```js
+
+const chartData = filteredData.flatMap(d => {
+  const magnitude = Number(d.Magnitude);
+  const points = [];
+  const stateName = d.State;
+  const Width = d.Width;
+
+  const injuriesAmount = +d.Injuries;
+  if (selectedMetrics.includes("Injuries")) {
+    points.push({ 
+      Magnitude: magnitude, 
+      Amount: injuriesAmount, 
+      Type: "Injury", 
+      State: stateName,
+      Width: Width,
+      Color: "#e05a2b"
+    });
+  }
+
+  const fatalitiesAmount = +d.Fatalities;
+  if (selectedMetrics.includes("Fatalities")) {
+    points.push({ 
+      Magnitude: magnitude, 
+      Amount: fatalitiesAmount, 
+      Type: "Fatality", 
+      State: stateName,
+      Width: Width,
+      Color: "#2be085"
+    });
+  }
+  
+  return points;
+});
+
+
+  display(Plot.plot({
+  width: 1400,
+  height: 430, 
+  marginBottom: 40,
+  marginTop: 40, 
+
+  style: {
+      fontSize: "14px",
+  },
+  y: {
+    type: "log", 
+    grid: true,
+    label: "Number of Affected People",
+  },
+  x: {
+    label: "Magnitude (abbreviated EF-Scale)",
+    labelOffset: 45,
+    tickFormat: d => `EF${d}`,
+    domain: [0, 1, 2, 3, 4, 5] 
+  },
+  marks: [
+    Plot.dot(chartData, {
+      x: "Magnitude",
+      y: "Amount",
+      stroke: "Color",
+      fill: "Color",
+      fillOpacity: 0.1,
+      strokeOpacity: 0.5,
+      r: d => Math.sqrt(d.Width) * 2,
+      tip: true,
+      title: d => `State: ${d.State}\nType: ${d.Type}\nAmount: ${d.Amount}\nWidth: ${d.Width} ft`
+    })
+  ]
+}));
+  ```
+  </div>
+
+  
 </div>

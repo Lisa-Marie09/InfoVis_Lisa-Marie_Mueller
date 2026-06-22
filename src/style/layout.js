@@ -1,8 +1,7 @@
-// sidebar.js
 import * as d3 from "npm:d3";
 
 export function createFilterBox() {
-  // 1. Der Haupt-Container für das Grid
+  //Main container for the layout
   const mainContainer = d3.create("div")
     .style("display", "flex")
     .style("position", "relative")
@@ -12,14 +11,13 @@ export function createFilterBox() {
 
   ;
 
-  // 2. Der linke Bereich für deine Karte
   const mapContainer = d3.create("div")
     .style("flex", "1")
     .style("position", "relative")
     .style("height", "100%")
   ;
 
-  // 3. Der rechte Bereich für die Filter
+  //Right side for the filters
   const sidebar = d3.create("div")
     .style("width", "280px")
     .style("height", "100%")
@@ -35,14 +33,12 @@ export function createFilterBox() {
     
   ;
 
-  // HTML-Struktur der Sidebar
   sidebar.html(`
     <h3 style="margin-top:0; margin-bottom:15px; font-size:16px;">Filter Options</h3>
-    <hr style="border:0; border-top:1px solid #e5e7eb; margin-bottom:15px;">
+    <hr style="border-top:1px solid #e5e7eb; margin-bottom:15px;">
     <div id="sidebar-filters"></div>
   `);
 
-  // 4. Der Toggle-Button oben rechts
   const toggleButton = d3.create("button")
     .text("Filter")
     .style("position", "absolute")
@@ -59,7 +55,6 @@ export function createFilterBox() {
   ;
   mapContainer.append(() => toggleButton.node());
 
-  // Klick-Logik zum Öffnen/Schließen
   let isOpen = false;
   toggleButton.on("click", () => {
     isOpen = !isOpen;
@@ -75,7 +70,6 @@ export function createFilterBox() {
   mainContainer.append(() => mapContainer.node());
   mainContainer.append(() => sidebar.node());
 
-  // Wir geben die Container zurück, damit du in deiner Hauptdatei Sachen reinhängen kannst
   return {
     container: mainContainer.node(),
     mapContainer: mapContainer,
@@ -97,8 +91,6 @@ export function createButton() {
   .style("font-size", "13px")
   .style("box-shadow", "0px 2px 4px rgba(0,0,0,0.1)")
   ;
-
-
 
   return resetButton;
 }

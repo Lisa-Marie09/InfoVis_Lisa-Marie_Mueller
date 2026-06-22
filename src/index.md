@@ -51,7 +51,6 @@ const filteredData = d3.filter(data, d => {
   const sumFatalities = d3.sum(filteredData, d => d.Fatalities);
   const sumTornados = filteredData.length;
 
-  // 2. Die Map befüllen (D3 gruppiert hier automatisch nach ID und zählt die Einträge)
   const dataMap = d3.rollup(
     filteredData, 
     v => v.length, 
@@ -61,7 +60,6 @@ const filteredData = d3.filter(data, d => {
   const states = topojson.feature(us, us.objects.states).features;
   const statemesh = topojson.mesh(us, us.objects.states, (a, b) => a !== b);
 
-  // 4. Karte zeichnen
   display(Plot.plot({
     projection: "identity",
     width: 1000,
@@ -101,10 +99,8 @@ const filteredData = d3.filter(data, d => {
     return isEFU ? 0 : d.Magnitude + 1;
   });
 
-// Durchschnitt auf der verschobenen Skala
 const avgShifted = filteredData.length > 0 ? shiftedSum / filteredData.length : 0;
 
-// Jetzt ziehen wir die 1 wieder ab, um den echten EF-Wert zurückzubekommen!
 const avgMagnitude = (avgShifted - 1).toFixed(2);
 
 ```

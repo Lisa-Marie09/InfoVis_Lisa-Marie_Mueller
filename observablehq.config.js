@@ -8,10 +8,10 @@ export default {
   // lets you organize them into sections and have unlisted pages.
   pages: [
     {
-      name: "Tornado Track Analysis",path: "/overview",       
+      name: "Tornado Track Analysis",path: "/tornado-tracks",       
     },
     {
-      name: "Overview",path: "/example-report",       
+      name: "Overview",path: "/overview",       
     }
   ],
  
