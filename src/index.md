@@ -79,9 +79,28 @@ const filteredData = d3.filter(data, d => {
     
     marks: [
       Plot.geo(states, {
-        fill: d => {
-          return dataMap.get(d.id) || 0;
-        },
+        fill: d => dataMap.get(d.id) || 0,
+
+        render: (index, scales, channels, dimensions, context, next) => {
+          const g = next(index, scales, channels, dimensions, context);
+          
+          //Select all states
+          d3.select(g)
+            .selectAll("path")
+            .each(function() {
+              const path = d3.select(this);
+              const targetColor = path.attr("fill");
+              
+              path
+                .attr("fill", "#faf0bf")
+                .transition()
+                .duration(400)
+                .ease(d3.easeCubicInOut)
+                .attr("fill", targetColor);
+            });
+            
+          return g;
+        }
       }),
       
       Plot.geo(statemesh, {stroke: "#590301", strokeWidth: 1})
