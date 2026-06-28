@@ -49,6 +49,16 @@ const magnitudeInput = Inputs.checkbox([-9, 0, 1, 2, 3, 4, 5], {
 const states = topojson.feature(us, us.objects.states).features;
 const statemesh = topojson.mesh(us, us.objects.states, (a, b) => a !== b);
 
+const magnitudeLegend = Plot.legend({
+  color: {
+    type: "ordinal",
+    domain: [-9, 0, 1, 2, 3, 4, 5],
+    range: ["#adadad", "#84e9e2", "#f1e374", "#d39d32", "#e6771d", "#d44a5f", "#8a6fe0"],
+    label: "Tornado Magnitude (EF-Scale)",
+    tickFormat: d => d === -9 ? "EFU" : `EF${d}` 
+  }
+});
+
 const renderMap = () =>
   Plot.plot({
     className: "tornado-map",
@@ -60,7 +70,6 @@ const renderMap = () =>
       type: "ordinal",
       domain: [-9, 0, 1, 2, 3, 4, 5],
       range: ["#adadad", "#84e9e2", "#f1e374", "#d39d32", "#e6771d", "#d44a5f", "#8a6fe0"],
-      legend: true,
       label: "Tornado Magnitude (EF-Scale)"
     },
     marks: [
@@ -85,6 +94,7 @@ const renderMap = () =>
 
 const layout = createFilterBox();
 const resetButton = createButton();
+layout.mapContainer.append(() => magnitudeLegend);
 layout.mapContainer.append(() => resetButton.node());
 
 const chart = renderMap();
